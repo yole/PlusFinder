@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PlusFinder</string>
+    <string name="create_character">Create Character</string>
+    <string name="no_characters">No characters defined</string>
+</resources>
