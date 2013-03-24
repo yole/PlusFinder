@@ -2,11 +2,13 @@ package ru.yole.plusfinder;
 
 import android.app.ListActivity;
 import android.app.LoaderManager;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.SimpleCursorAdapter;
 
 public class CharacterListActivity extends ListActivity {
@@ -25,6 +27,7 @@ public class CharacterListActivity extends ListActivity {
         getLoaderManager().initLoader(0, null, myLoaderCallbacks);
         myCursorAdapter = new SimpleCursorAdapter(this, R.layout.character, null,
                 new String[] { "name" }, new int[] { R.id.name }, 0);
+        setListAdapter(myCursorAdapter);
     }
 
     @Override
@@ -32,6 +35,25 @@ public class CharacterListActivity extends ListActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.character_list, menu);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getLoaderManager().restartLoader(0, null, myLoaderCallbacks);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_create_character:
+                Intent intent = new Intent(this, EditCharacterActivity.class);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private class MyLoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
