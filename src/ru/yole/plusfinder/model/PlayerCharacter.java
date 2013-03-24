@@ -33,4 +33,25 @@ public class PlayerCharacter {
         Integer stat = myStats.get(name);
         return stat == null ? 0 : stat;
     }
+
+    public void setStat(String name, int value) {
+        myStats.put(name, value);
+    }
+
+    public static int getStatMinValue(String statName) {
+        return isAbility(statName) ? 3 : 0;
+    }
+
+    private static boolean isAbility(String statName) {
+        for (int i = 0; i < 6; i++) {
+            if (statName.equals(STAT_NAMES[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int getStatDefault(String statName) {
+        return isAbility(statName) ? 10 : 0;
+    }
 }

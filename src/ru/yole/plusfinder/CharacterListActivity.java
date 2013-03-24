@@ -24,10 +24,10 @@ public class CharacterListActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         myDatabaseHelper = new DatabaseHelper(this);
-        getLoaderManager().initLoader(0, null, myLoaderCallbacks);
         myCursorAdapter = new SimpleCursorAdapter(this, R.layout.character, null,
                 new String[] { "name" }, new int[] { R.id.name }, 0);
         setListAdapter(myCursorAdapter);
+        getLoaderManager().initLoader(0, null, myLoaderCallbacks);
     }
 
     @Override

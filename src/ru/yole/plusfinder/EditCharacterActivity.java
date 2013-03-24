@@ -1,24 +1,56 @@
 package ru.yole.plusfinder;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import ru.yole.plusfinder.model.PlayerCharacter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author yole
  */
 public class EditCharacterActivity extends Activity {
     private PlayerCharacter myCharacter;
+    private final Map<String, NumberPickerFragment> myPickers = new HashMap<String, NumberPickerFragment>();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_character);
+        GridLayout grid = (GridLayout) findViewById(R.id.characterGrid);
+        int row = 1;
+        int baseLayoutId = 0x200;
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        for (String s : PlayerCharacter.STAT_NAMES) {
+            TextView label = new TextView(this);
+            label.setText(s);
+            label.setTextSize(TypedValue.COMPLEX_UNIT_PT, 14);
+            label.setGravity(Gravity.CENTER_VERTICAL);
+            grid.addView(label, new GridLayout.LayoutParams(GridLayout.spec(row), GridLayout.spec(0)));
+
+            LinearLayout fragmentLayout = new LinearLayout(this);
+            fragmentLayout.setId(baseLayoutId + row);
+            grid.addView(fragmentLayout, new GridLayout.LayoutParams(GridLayout.spec(row), GridLayout.spec(1)));
+
+            NumberPickerFragment fragment = new NumberPickerFragment();
+            transaction.add(baseLayoutId + row, fragment, "stat" + s);
+            fragment.setValue(myCharacter == null ? PlayerCharacter.getStatDefault(s) : myCharacter.getStat(s));
+            fragment.setMinValue(PlayerCharacter.getStatMinValue(s));
+            myPickers.put(s, fragment);
+            row++;
+        }
+        transaction.commit();
     }
 
     @Override
@@ -52,5 +84,8 @@ public class EditCharacterActivity extends Activity {
     private void updateCharacter(PlayerCharacter character) {
         EditText nameView = (EditText) findViewById(R.id.name);
         character.setName(nameView.getText().toString());
+        for (Map.Entry<String, NumberPickerFragment> entry : myPickers.entrySet()) {
+            character.setStat(entry.getKey(), entry.getValue().getValue());
+        }
     }
 }
