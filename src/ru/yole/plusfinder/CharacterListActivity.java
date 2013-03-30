@@ -9,9 +9,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 public class CharacterListActivity extends ListActivity {
+    public static final String CHARACTER_ID_EXTRA = "plusFinderCharacterId";
     private DatabaseHelper myDatabaseHelper;
     private MyLoaderCallbacks myLoaderCallbacks = new MyLoaderCallbacks();
     private SimpleCursorAdapter myCursorAdapter;
@@ -54,6 +57,13 @@ public class CharacterListActivity extends ListActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        Intent intent = new Intent(this, CharacterActivity.class);
+        intent.putExtra(CHARACTER_ID_EXTRA, id);
+        startActivity(intent);
     }
 
     private class MyLoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {

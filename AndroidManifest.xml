@@ -13,5 +13,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".EditCharacterActivity" android:label="Edit Character"/>
+        <activity android:name=".CharacterActivity"/>
     </application>
 </manifest>

@@ -130,4 +130,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return values;
     }
+
+    public PlayerCharacter loadCharacter(long characterId) {
+        Cursor query = getReadableDatabase().query(TABLE_CHARACTERS, null, "_id=?", new String[]{Long.toString(characterId)},
+                null, null, null);
+        if (!query.moveToFirst()) {
+            return null;
+        }
+        PlayerCharacter pc = new PlayerCharacter();
+        String[] columnNames = query.getColumnNames();
+        for (int i = 0; i < columnNames.length; i++) {
+            String column = columnNames[i];
+            if (column.equals("name")) {
+                pc.setName(query.getString(i));
+            }
+            else if (column.equals("_id")) {
+                pc.setId(query.getLong(i));
+            }
+            else {
+                pc.setStat(column, query.getInt(i));
+            }
+        }
+        return pc;
+    }
 }
