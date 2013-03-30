@@ -3,8 +3,7 @@ package ru.yole.plusfinder.model;
 /**
  * @author yole
  */
-public class Weapon {
-    private String myName;
+public class Weapon extends Named {
     private int myDamageDiceCount = 1;
     private int myDamageDiceSize;
     private int myAttackModifier;
@@ -12,14 +11,6 @@ public class Weapon {
     private int myCritRange = 20;
     private int myCritModifier = 2;
     private int myIsMissile;
-
-    public void setName(String name) {
-        myName = name;
-    }
-
-    public String getName() {
-        return myName;
-    }
 
     public int getDamageDiceCount() {
         return myDamageDiceCount;

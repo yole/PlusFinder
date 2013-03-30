@@ -2,9 +2,9 @@ package ru.yole.plusfinder;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.view.ViewGroup;
+import android.widget.*;
+import ru.yole.plusfinder.model.ActiveCondition;
 import ru.yole.plusfinder.model.PlayerCharacter;
 import ru.yole.plusfinder.model.Weapon;
 
@@ -35,8 +35,28 @@ public class CharacterActivity extends Activity {
         ArrayAdapter<Weapon> adapter = new ArrayAdapter<Weapon>(this, R.layout.weapon_view, myCharacter.getWeapons());
         myWeaponSpinner.setAdapter(adapter);
         myAttackText = (TextView) findViewById(R.id.attackText);
-        myAttackText.setText("Attack: " + myCharacter.getAttackText());
         myDamageText = (TextView) findViewById(R.id.damageText);
+
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.characterActivity);
+        for (final ActiveCondition activeCondition : myCharacter.getActiveConditions()) {
+            Switch conditionSwitch = new Switch(this);
+            conditionSwitch.setText(activeCondition.getCondition().getName());
+            conditionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    activeCondition.setActive(!activeCondition.isActive());
+                    updateValues();
+                }
+            });
+            linearLayout.addView(conditionSwitch,
+                    new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
+
+        updateValues();
+    }
+
+    private void updateValues() {
+        myAttackText.setText("Attack: " + myCharacter.getAttackText());
         myDamageText.setText("Damage: " + myCharacter.getDamageText());
     }
 }

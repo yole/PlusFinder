@@ -5,12 +5,12 @@ import java.util.*;
 /**
  * @author yole
  */
-public class PlayerCharacter {
+public class PlayerCharacter extends Named {
     private long myId = -1;
-    private String myName;
     private final Map<String, Integer> myStats = new HashMap<String, Integer>();
     private final List<Weapon> myWeapons = new ArrayList<Weapon>();
     private Weapon myActiveWeapon;
+    private final List<ActiveCondition> myActiveConditions = new ArrayList<ActiveCondition>();
 
     public static final String STAT_STR = "Str";
     public static final String STAT_DEX = "Dex";
@@ -21,14 +21,6 @@ public class PlayerCharacter {
 
     public long getId() {
         return myId;
-    }
-
-    public String getName() {
-        return myName;
-    }
-
-    public void setName(String name) {
-        myName = name;
     }
 
     public void setId(long id) {
@@ -50,6 +42,24 @@ public class PlayerCharacter {
     public void setWeapons(Collection<Weapon> weapons) {
         myWeapons.clear();
         myWeapons.addAll(weapons);
+    }
+
+    public void addActiveCondition(Condition condition) {
+        myActiveConditions.add(new ActiveCondition(condition));
+    }
+
+    public List<ActiveCondition> getActiveConditions() {
+        return myActiveConditions;
+    }
+
+    private List<Condition> getCurrentConditions() {
+        List<Condition> result = new ArrayList<Condition>();
+        for (ActiveCondition condition : myActiveConditions) {
+            if (condition.isActive()) {
+                result.add(condition.getCondition());
+            }
+        }
+        return result;
     }
 
     public int getStat(String name) {
@@ -86,6 +96,9 @@ public class PlayerCharacter {
                 result.append("/");
             }
             int attackBonusModifier = myActiveWeapon.isMissile() ? getBonus(STAT_DEX) : getBonus(STAT_STR);
+            for (Condition condition : getCurrentConditions()) {
+                attackBonusModifier += condition.getAttackBonus();
+            }
             result.append("+");
             result.append(attackBonus + attackBonusModifier);
             attackBonus -= 5;
