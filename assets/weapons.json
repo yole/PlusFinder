@@ -1,0 +1,11 @@
+[
+     {
+         "name": "Unarmed Strike",
+         "damageDiceSize": 3
+     },
+     {
+         "name": "Long Sword",
+         "damageDiceSize": 8,
+         "critRange": 19
+     }
+]
