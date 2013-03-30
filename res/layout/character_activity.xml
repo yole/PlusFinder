@@ -5,4 +5,18 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
+    <Spinner
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/weaponSpinner" android:layout_gravity="center"/>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/attackText"/>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/damageText" android:layout_gravity="center"/>
 </LinearLayout>

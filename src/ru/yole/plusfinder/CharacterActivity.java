@@ -2,7 +2,11 @@ package ru.yole.plusfinder;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
 import ru.yole.plusfinder.model.PlayerCharacter;
+import ru.yole.plusfinder.model.Weapon;
 
 /**
  * @author yole
@@ -10,6 +14,9 @@ import ru.yole.plusfinder.model.PlayerCharacter;
 public class CharacterActivity extends Activity {
     private DatabaseHelper myDatabaseHelper;
     private PlayerCharacter myCharacter;
+    private Spinner myWeaponSpinner;
+    private TextView myAttackText;
+    private TextView myDamageText;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,5 +31,12 @@ public class CharacterActivity extends Activity {
             finish();
         }
         setTitle(myCharacter.getName());
+        myWeaponSpinner = (Spinner) findViewById(R.id.weaponSpinner);
+        ArrayAdapter<Weapon> adapter = new ArrayAdapter<Weapon>(this, R.layout.weapon_view, myCharacter.getWeapons());
+        myWeaponSpinner.setAdapter(adapter);
+        myAttackText = (TextView) findViewById(R.id.attackText);
+        myAttackText.setText("Attack: " + myCharacter.getAttackText());
+        myDamageText = (TextView) findViewById(R.id.damageText);
+        myDamageText.setText("Damage: " + myCharacter.getDamageText());
     }
 }

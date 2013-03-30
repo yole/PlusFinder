@@ -11,11 +11,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import ru.yole.plusfinder.model.PlayerCharacter;
+import ru.yole.plusfinder.model.Weapon;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -23,10 +27,11 @@ import java.util.Iterator;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "plusfinder.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 7;
 
     private static final String TABLE_CHARACTERS = "Characters";
     private static final String TABLE_WEAPONS = "Weapons";
+    private static final String TABLE_CHARACTER_WEAPONS = "CharacterWeapons";
 
     private final Context myContext;
 
@@ -47,7 +52,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.execSQL("create table Weapons(_id integer primary key autoincrement, name text not null," +
                 "damageDiceCount int default '1', damageDiceSize int, attackModifier int default '0', " +
-                "damageModifier int default '0', critRange int default '20', critModifier int default '2')");
+                "damageModifier int default '0', critRange int default '20', critModifier int default '2'," +
+                "isMissile int default '0')");
+        db.execSQL("create table CharacterWeapons(_id integer primary key autoincrement, characterId integer, " +
+                "weaponId integer, active integer)");
 
         loadJsonToTable(db, "weapons.json", TABLE_WEAPONS);
     }
@@ -98,10 +106,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("drop table Characters");
-        if (oldVersion >= 3) {
-            db.execSQL("drop table Weapons");
-        }
+        db.execSQL("drop table if exists Characters");
+        db.execSQL("drop table if exists Weapons");
+        db.execSQL("drop table if exists " + TABLE_CHARACTER_WEAPONS);
         onCreate(db);
     }
 
@@ -151,6 +158,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 pc.setStat(column, query.getInt(i));
             }
         }
+        Weapon unarmedStrike = loadUnarmedStrike();
+        pc.setWeapons(Collections.singleton(unarmedStrike));
+        pc.setActiveWeapon(unarmedStrike);
         return pc;
+    }
+
+    private Weapon loadUnarmedStrike() {
+        Cursor query = getReadableDatabase().query(TABLE_WEAPONS, null, "name=?", new String[] { "Unarmed Strike" },
+                null, null, null);
+        if (!query.moveToFirst()) {
+            return null;
+        }
+        return loadWeaponFromCursor(query);
+    }
+
+    private Weapon loadWeaponFromCursor(Cursor query) {
+        Weapon weapon = new Weapon();
+        String[] columnNames = query.getColumnNames();
+        for (int i = 0; i < columnNames.length; i++) {
+            String columnName = columnNames[i];
+            if (columnName.equals("name")) {
+                weapon.setName(query.getString(i));
+            }
+            String setterName = "set" + Character.toUpperCase(columnName.charAt(0)) + columnName.substring(1);
+            try {
+                Method setter = Weapon.class.getDeclaredMethod(setterName, int.class);
+                setter.invoke(weapon, query.getInt(i));
+
+            } catch (NoSuchMethodException ignored) {
+            }
+            catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+            catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return weapon;
     }
 }
