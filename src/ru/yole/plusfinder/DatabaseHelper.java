@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "plusfinder.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private static final String TABLE_CHARACTERS = "Characters";
     private static final String TABLE_WEAPONS = "Weapons";
@@ -61,11 +61,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "isMissile int default '0')");
         db.execSQL("create table CharacterWeapons(_id integer primary key autoincrement, characterId integer, " +
                 "weaponId integer, active integer)");
-        db.execSQL("create table Conditions(_id integer primary key autoincrement, name text not null," +
-                "attackBonus int default '0')");
+        createTableFromBean(db, TABLE_CONDITIONS, Condition.class);
 
         loadJsonToTable(db, "weapons.json", TABLE_WEAPONS);
         loadJsonToTable(db, "conditions.json", TABLE_CONDITIONS);
+    }
+
+    private void createTableFromBean(SQLiteDatabase db, String tableName, Class entityClass) {
+        StringBuilder builder = new StringBuilder("create table ");
+        builder.append(tableName).append("(_id integer primary key autoincrement, name text not null");
+        for (Method method : entityClass.getDeclaredMethods()) {
+            String name = method.getName();
+            if (name.startsWith("set")) {
+                String fieldName = Character.toLowerCase(name.charAt(3)) + name.substring(4);
+                builder.append(",").append(fieldName).append(" int default '0'");
+            }
+        }
+        builder.append(")");
+        db.execSQL(builder.toString());
     }
 
     private void loadJsonToTable(SQLiteDatabase db, String assetFileName, String tableName) {
@@ -84,7 +97,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     else if (value instanceof Integer) {
                         contentValues.put(key, (Integer) value);
                     }
-                    else {
+                    else if (value instanceof Boolean) {
+                        contentValues.put(key, ((Boolean) value) ? 1 : 0);
+                    } else {
                         throw new RuntimeException("Unrecognized object type in JSON: " + value);
                     }
                 }

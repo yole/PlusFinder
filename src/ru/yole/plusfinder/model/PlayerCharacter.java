@@ -56,7 +56,14 @@ public class PlayerCharacter extends Named {
         List<Condition> result = new ArrayList<Condition>();
         for (ActiveCondition condition : myActiveConditions) {
             if (condition.isActive()) {
-                result.add(condition.getCondition());
+                Condition c = condition.getCondition();
+                if (c.missileOnly() && !myActiveWeapon.isMissile()) {
+                    continue;
+                }
+                if (c.meleeOnly() && myActiveWeapon.isMissile()) {
+                    continue;
+                }
+                result.add(c);
             }
         }
         return result;
@@ -97,13 +104,21 @@ public class PlayerCharacter extends Named {
             }
             int attackBonusModifier = myActiveWeapon.isMissile() ? getBonus(STAT_DEX) : getBonus(STAT_STR);
             for (Condition condition : getCurrentConditions()) {
-                attackBonusModifier += condition.getAttackBonus();
+                attackBonusModifier += multiplyByBab(condition, condition.getAttackBonus());
             }
             result.append("+");
             result.append(attackBonus + attackBonusModifier);
             attackBonus -= 5;
         } while(attackBonus > 0);
         return result.toString();
+    }
+
+    private int multiplyByBab(Condition condition, int bonus) {
+        int multiplier = condition.getBabMultiplier();
+        if (multiplier > 0) {
+            return (getStat(STAT_BAB) / multiplier + 1) * bonus;
+        }
+        return bonus;
     }
 
     public int getBonus(String statStr) {
@@ -114,6 +129,14 @@ public class PlayerCharacter extends Named {
         if (myActiveWeapon == null) {
             return "-";
         }
-        return myActiveWeapon.getDamageDiceCount() + "d" + myActiveWeapon.getDamageDiceSize();
+        String baseDamage = myActiveWeapon.getDamageDiceCount() + "d" + myActiveWeapon.getDamageDiceSize();
+        int damageBonus = myActiveWeapon.getDamageModifier();
+        for (Condition condition : getCurrentConditions()) {
+            damageBonus += multiplyByBab(condition, condition.getDamageBonus());
+        }
+        if (damageBonus != 0) {
+            return baseDamage + "+" + damageBonus;
+        }
+        return baseDamage;
     }
 }

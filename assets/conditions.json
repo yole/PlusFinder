@@ -2,5 +2,12 @@
      {
          "name": "Dazzled",
          "attackBonus": -1
+     },
+     {
+         "name": "Power Attack",
+         "attackBonus": -1,
+         "damageBonus": 2,
+         "babMultiplier": 4,
+         "meleeOnly": true
      }
 ]
