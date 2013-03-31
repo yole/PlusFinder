@@ -14,6 +14,7 @@ public class Condition extends BaseEntity {
     private int myStrBonus;
     private int myDexBonus;
     private int mySaveBonus;
+    private int myExtraAttacks;
 
     public int getAttackBonus() {
         return myAttackBonus;
@@ -71,6 +72,14 @@ public class Condition extends BaseEntity {
         mySaveBonus = saveBonus;
     }
 
+    public int getExtraAttacks() {
+        return myExtraAttacks;
+    }
+
+    public void setExtraAttacks(int extraAttacks) {
+        myExtraAttacks = extraAttacks;
+    }
+
     public int getBabMultiplier() {
         return myBabMultiplier;
     }
@@ -94,4 +103,5 @@ public class Condition extends BaseEntity {
     public void setMissileOnly(int missileOnly) {
         myMissileOnly = missileOnly;
     }
+
 }

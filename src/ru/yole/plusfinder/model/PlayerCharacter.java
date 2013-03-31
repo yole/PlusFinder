@@ -107,6 +107,10 @@ public class PlayerCharacter extends BaseEntity {
 
     public String getAttackText() {
         int attackBonus = getStat(STAT_BAB);
+        int extraAttacks = 0;
+        for (Condition condition : getCurrentConditions()) {
+            extraAttacks += condition.getExtraAttacks();
+        }
         StringBuilder result = new StringBuilder();
         do {
             if (result.length() > 0) {
@@ -118,7 +122,12 @@ public class PlayerCharacter extends BaseEntity {
             }
             result.append("+");
             result.append(attackBonus + attackBonusModifier);
-            attackBonus -= 5;
+            if (extraAttacks > 0) {
+                extraAttacks--;
+            }
+            else {
+                attackBonus -= 5;
+            }
         } while(attackBonus > 0);
         return result.toString();
     }

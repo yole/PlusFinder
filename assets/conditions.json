@@ -39,10 +39,35 @@
          "saveBonus": -2
      },
      {
+         "name": "Combat Expertise",
+         "attackBonus": -1,
+         "acBonus": 1,
+         "babMultiplier": 4
+     },
+     {
+         "name": "Deadly Aim",
+         "attackBonus": -1,
+         "damageBonus": 2,
+         "babMultiplier": 4,
+         "missileOnly": true
+     },
+     {
+         "name": "Point-Blank Shot",
+         "attackBonus": 1,
+         "damageBonus": 1,
+         "missileOnly": true
+     },
+     {
          "name": "Power Attack",
          "attackBonus": -1,
          "damageBonus": 2,
          "babMultiplier": 4,
          "meleeOnly": true
+     },
+     {
+         "name": "Rapid Shot",
+         "extraAttacks": 1,
+         "attackBonus": -2,
+         "missileOnly": true
      }
 ]
