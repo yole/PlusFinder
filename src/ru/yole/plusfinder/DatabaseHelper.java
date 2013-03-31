@@ -10,10 +10,7 @@ import com.commonsware.cwac.loaderex.SQLiteCursorLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import ru.yole.plusfinder.model.Condition;
-import ru.yole.plusfinder.model.Named;
-import ru.yole.plusfinder.model.PlayerCharacter;
-import ru.yole.plusfinder.model.Weapon;
+import ru.yole.plusfinder.model.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,12 +28,13 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "plusfinder.db";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
 
     private static final String TABLE_CHARACTERS = "Characters";
     private static final String TABLE_WEAPONS = "Weapons";
     private static final String TABLE_CHARACTER_WEAPONS = "CharacterWeapons";
     private static final String TABLE_CONDITIONS = "Conditions";
+    private static final String TABLE_ITEMS = "Items";
 
     private final Context myContext;
 
@@ -62,9 +60,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("create table CharacterWeapons(_id integer primary key autoincrement, characterId integer, " +
                 "weaponId integer, active integer)");
         createTableFromBean(db, TABLE_CONDITIONS, Condition.class);
+        createTableFromBean(db, TABLE_ITEMS, Item.class);
+        db.execSQL("create table CharacterItems(_id integer primary key autoincrement, characterId integer," +
+                "itemId integer)");
 
         loadJsonToTable(db, "weapons.json", TABLE_WEAPONS);
         loadJsonToTable(db, "conditions.json", TABLE_CONDITIONS);
+        loadJsonToTable(db, "items.json", TABLE_ITEMS);
     }
 
     private void createTableFromBean(SQLiteDatabase db, String tableName, Class entityClass) {
@@ -187,18 +189,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for (Condition condition : loadAllConditions()) {
             pc.addActiveCondition(condition);
         }
+        Item item = new Item();
+        if (loadEntityByName(item, Item.class, TABLE_ITEMS, "Chain Mail")) {
+            pc.addItem(item);
+        }
         return pc;
     }
 
     private Weapon loadUnarmedStrike() {
-        Cursor query = getReadableDatabase().query(TABLE_WEAPONS, null, "name=?", new String[] { "Unarmed Strike" },
+        Weapon weapon = new Weapon();
+        if (!loadEntityByName(weapon, Weapon.class, TABLE_WEAPONS, "Unarmed Strike")) return null;
+        return weapon;
+    }
+
+    private <T> boolean loadEntityByName(T entity, Class<T> entityClass, String tableName, String entityName) {
+        Cursor query = getReadableDatabase().query(tableName, null, "name=?", new String[] { entityName },
                 null, null, null);
         if (!query.moveToFirst()) {
-            return null;
+            return false;
         }
-        Weapon weapon = new Weapon();
-        loadEntityFromCursor(query, weapon, Weapon.class);
-        return weapon;
+        loadEntityFromCursor(query, entity, entityClass);
+        return true;
     }
 
     private List<Condition> loadAllConditions() {

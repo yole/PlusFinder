@@ -19,4 +19,9 @@
             android:layout_height="wrap_content"
             android:text="New Text"
             android:id="@+id/damageText" android:layout_gravity="center"/>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/acText"/>
 </LinearLayout>

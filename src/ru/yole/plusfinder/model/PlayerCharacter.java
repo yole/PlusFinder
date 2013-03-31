@@ -11,6 +11,7 @@ public class PlayerCharacter extends Named {
     private final List<Weapon> myWeapons = new ArrayList<Weapon>();
     private Weapon myActiveWeapon;
     private final List<ActiveCondition> myActiveConditions = new ArrayList<ActiveCondition>();
+    private final List<Item> myInventory = new ArrayList<Item>();
 
     public static final String STAT_STR = "Str";
     public static final String STAT_DEX = "Dex";
@@ -50,6 +51,10 @@ public class PlayerCharacter extends Named {
 
     public List<ActiveCondition> getActiveConditions() {
         return myActiveConditions;
+    }
+
+    public void addItem(Item item) {
+        myInventory.add(item);
     }
 
     private List<Condition> getCurrentConditions() {
@@ -138,5 +143,13 @@ public class PlayerCharacter extends Named {
             return baseDamage + "+" + damageBonus;
         }
         return baseDamage;
+    }
+
+    public int getACText() {
+        int currentAC = 10;
+        for (Item item : myInventory) {
+            currentAC += item.getAcBonus();
+        }
+        return currentAC;
     }
 }

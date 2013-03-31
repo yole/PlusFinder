@@ -17,6 +17,7 @@ public class CharacterActivity extends Activity {
     private Spinner myWeaponSpinner;
     private TextView myAttackText;
     private TextView myDamageText;
+    private TextView myACText;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +37,7 @@ public class CharacterActivity extends Activity {
         myWeaponSpinner.setAdapter(adapter);
         myAttackText = (TextView) findViewById(R.id.attackText);
         myDamageText = (TextView) findViewById(R.id.damageText);
+        myACText = (TextView) findViewById(R.id.acText);
 
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.characterActivity);
         for (final ActiveCondition activeCondition : myCharacter.getActiveConditions()) {
@@ -58,5 +60,6 @@ public class CharacterActivity extends Activity {
     private void updateValues() {
         myAttackText.setText("Attack: " + myCharacter.getAttackText());
         myDamageText.setText("Damage: " + myCharacter.getDamageText());
+        myACText.setText("AC: " + myCharacter.getACText());
     }
 }
