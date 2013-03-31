@@ -18,23 +18,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author yole
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "plusfinder.db";
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 12;
 
     private static final String TABLE_CHARACTERS = "Characters";
     private static final String TABLE_WEAPONS = "Weapons";
     private static final String TABLE_CHARACTER_WEAPONS = "CharacterWeapons";
     private static final String TABLE_CONDITIONS = "Conditions";
     private static final String TABLE_ITEMS = "Items";
+    private static final String TABLE_CHARACTER_ITEMS = "CharacterItems";
 
     private final Context myContext;
 
@@ -59,9 +57,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "isMissile int default '0')");
         db.execSQL("create table CharacterWeapons(_id integer primary key autoincrement, characterId integer, " +
                 "weaponId integer, active integer)");
-        createTableFromBean(db, TABLE_CONDITIONS, Condition.class);
-        createTableFromBean(db, TABLE_ITEMS, Item.class);
-        db.execSQL("create table CharacterItems(_id integer primary key autoincrement, characterId integer," +
+        createTableFromBean(db, TABLE_CONDITIONS, Condition.class, new Condition());
+        createTableFromBean(db, TABLE_ITEMS, Item.class, new Item());
+        db.execSQL("create table " + TABLE_CHARACTER_ITEMS + "(_id integer primary key autoincrement, characterId integer," +
                 "itemId integer)");
 
         loadJsonToTable(db, "weapons.json", TABLE_WEAPONS);
@@ -69,14 +67,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadJsonToTable(db, "items.json", TABLE_ITEMS);
     }
 
-    private void createTableFromBean(SQLiteDatabase db, String tableName, Class entityClass) {
+    private void createTableFromBean(SQLiteDatabase db, String tableName, Class entityClass, Object defaultValueSource) {
         StringBuilder builder = new StringBuilder("create table ");
         builder.append(tableName).append("(_id integer primary key autoincrement, name text not null");
         for (Method method : entityClass.getDeclaredMethods()) {
             String name = method.getName();
             if (name.startsWith("set")) {
                 String fieldName = Character.toLowerCase(name.charAt(3)) + name.substring(4);
-                builder.append(",").append(fieldName).append(" int default '0'");
+                int defaultValue = 0;
+                try {
+                    Method getMethod = entityClass.getMethod("g" + name.substring(1));
+                    defaultValue = (Integer) getMethod.invoke(defaultValueSource);
+                } catch (NoSuchMethodException ignored) {
+                } catch (InvocationTargetException ignored) {
+                } catch (IllegalAccessException ignored) {
+                }
+                builder.append(",").append(fieldName).append(" int default '").append(defaultValue).append("'");
             }
         }
         builder.append(")");
@@ -131,7 +137,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        for(String tableName: new String[] { TABLE_CHARACTERS, TABLE_WEAPONS, TABLE_CHARACTER_WEAPONS, TABLE_CONDITIONS }) {
+        List<String> allTables = Arrays.asList(TABLE_CHARACTERS,
+                TABLE_WEAPONS, TABLE_CHARACTER_WEAPONS,
+                TABLE_CONDITIONS,
+                TABLE_ITEMS, TABLE_CHARACTER_ITEMS);
+        for(String tableName: allTables) {
             db.execSQL("drop table if exists " + tableName);
         }
         onCreate(db);

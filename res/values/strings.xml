@@ -5,4 +5,5 @@
     <string name="no_characters">No characters defined</string>
     <string name="name">Name:</string>
     <string name="save">Save</string>
+    <string name="inventory">Inventory</string>
 </resources>

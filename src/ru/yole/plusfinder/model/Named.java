@@ -13,4 +13,9 @@ public class Named {
     public void setName(String name) {
         myName = name;
     }
+
+    @Override
+    public String toString() {
+        return myName;
+    }
 }

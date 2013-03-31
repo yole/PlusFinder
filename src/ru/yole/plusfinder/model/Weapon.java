@@ -67,9 +67,4 @@ public class Weapon extends Named {
     public void setIsMissile(int isMissile) {
         myIsMissile = isMissile;
     }
-
-    @Override
-    public String toString() {
-        return getName();
-    }
 }

@@ -1,6 +1,12 @@
 [
     {
-        name: "Chain Mail",
-        acBonus: 5
+        "name": "Chain Mail",
+        "acBonus": 5,
+        "maxDexBonus": 2
+    },
+    {
+        "name": "Banded Mail",
+        "acBonus": 7,
+        "maxDexBonus": 0
     }
 ]

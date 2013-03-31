@@ -147,9 +147,19 @@ public class PlayerCharacter extends Named {
 
     public int getACText() {
         int currentAC = 10;
+        int dexBonus = getBonus(STAT_DEX);
         for (Item item : myInventory) {
             currentAC += item.getAcBonus();
+            int maxDexBonus = item.getMaxDexBonus();
+            if (maxDexBonus >= 0) {
+                dexBonus = Math.min(dexBonus, maxDexBonus);
+            }
         }
+        currentAC += dexBonus;
         return currentAC;
+    }
+
+    public List<Item> getInventory() {
+        return myInventory;
     }
 }

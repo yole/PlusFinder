@@ -1,19 +1,19 @@
 package ru.yole.plusfinder;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.*;
 import ru.yole.plusfinder.model.ActiveCondition;
-import ru.yole.plusfinder.model.PlayerCharacter;
 import ru.yole.plusfinder.model.Weapon;
 
 /**
  * @author yole
  */
-public class CharacterActivity extends Activity {
-    private DatabaseHelper myDatabaseHelper;
-    private PlayerCharacter myCharacter;
+public class CharacterActivity extends AbstractCharacterActivity {
     private Spinner myWeaponSpinner;
     private TextView myAttackText;
     private TextView myDamageText;
@@ -22,15 +22,6 @@ public class CharacterActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.character_activity);
-        long characterId = getIntent().getLongExtra(CharacterListActivity.CHARACTER_ID_EXTRA, -1);
-        if (characterId == -1) {
-            finish();
-        }
-        myDatabaseHelper = new DatabaseHelper(this);
-        myCharacter = myDatabaseHelper.loadCharacter(characterId);
-        if (myCharacter == null) {
-            finish();
-        }
         setTitle(myCharacter.getName());
         myWeaponSpinner = (Spinner) findViewById(R.id.weaponSpinner);
         ArrayAdapter<Weapon> adapter = new ArrayAdapter<Weapon>(this, R.layout.weapon_view, myCharacter.getWeapons());
@@ -61,5 +52,26 @@ public class CharacterActivity extends Activity {
         myAttackText.setText("Attack: " + myCharacter.getAttackText());
         myDamageText.setText("Damage: " + myCharacter.getDamageText());
         myACText.setText("AC: " + myCharacter.getACText());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.character, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_inventory:
+                Intent intent = new Intent(this, InventoryActivity.class);
+                intent.putExtra(CharacterListActivity.CHARACTER_ID_EXTRA, myCharacter.getId());
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
