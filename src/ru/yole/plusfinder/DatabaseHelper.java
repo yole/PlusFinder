@@ -25,12 +25,13 @@ import java.util.*;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "plusfinder.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 15;
 
     private static final String TABLE_CHARACTERS = "Characters";
     private static final String TABLE_WEAPONS = "Weapons";
     private static final String TABLE_CHARACTER_WEAPONS = "CharacterWeapons";
     private static final String TABLE_CONDITIONS = "Conditions";
+    private static final String TABLE_CHARACTER_CONDITIONS = "CharacterConditions";
     private static final String TABLE_ITEMS = "Items";
     private static final String TABLE_CHARACTER_ITEMS = "CharacterItems";
 
@@ -57,6 +58,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "isMissile int default '0')");
         db.execSQL("create table CharacterWeapons(_id integer primary key autoincrement, characterId integer, " +
                 "weaponId integer, active integer)");
+        db.execSQL("create table CharacterConditions(_id integer primary key autoincrement, characterId integer, " +
+                "conditionId integer, active integer)");
         createTableFromBean(db, TABLE_CONDITIONS, Condition.class, new Condition());
         createTableFromBean(db, TABLE_ITEMS, Item.class, new Item());
         db.execSQL("create table " + TABLE_CHARACTER_ITEMS + "(_id integer primary key autoincrement, characterId integer," +
@@ -139,7 +142,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         List<String> allTables = Arrays.asList(TABLE_CHARACTERS,
                 TABLE_WEAPONS, TABLE_CHARACTER_WEAPONS,
-                TABLE_CONDITIONS,
+                TABLE_CONDITIONS, TABLE_CHARACTER_CONDITIONS,
                 TABLE_ITEMS, TABLE_CHARACTER_ITEMS);
         for(String tableName: allTables) {
             db.execSQL("drop table if exists " + tableName);
@@ -193,13 +196,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 pc.setStat(column, query.getInt(i));
             }
         }
-        for (Condition condition : loadAllConditions()) {
-            pc.addActiveCondition(condition);
-        }
-
+        loadCharacterConditions(pc);
         loadCharacterItems(pc);
         loadCharacterWeapons(pc);
         return pc;
+    }
+
+    private void loadCharacterConditions(PlayerCharacter pc) {
+        String query = "select cc.active, c.* from Conditions c inner join CharacterConditions cc on c._id=cc.conditionId where cc.characterId=?";
+        Cursor c = getReadableDatabase().rawQuery(query, new String[] { Long.toString(pc.getId())} );
+        if (c.moveToFirst()) {
+            do {
+                boolean active = c.getInt(0) != 0;
+                Condition condition = new Condition();
+                loadEntityFromCursor(c, condition);
+                pc.addActiveCondition(condition, active);
+            } while(c.moveToNext());
+        }
     }
 
     private void loadCharacterItems(PlayerCharacter pc) {
@@ -220,21 +233,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private Weapon loadUnarmedStrike() {
         Weapon weapon = new Weapon();
-        if (!loadEntityByName(weapon, Weapon.class, TABLE_WEAPONS, "Unarmed Strike")) return null;
+        if (!loadEntityByName(weapon, TABLE_WEAPONS, "Unarmed Strike")) return null;
         return weapon;
     }
 
-    private <T extends BaseEntity> boolean loadEntityByName(T entity, Class<T> entityClass, String tableName, String entityName) {
+    private <T extends BaseEntity> boolean loadEntityByName(T entity, String tableName, String entityName) {
         Cursor query = getReadableDatabase().query(tableName, null, "name=?", new String[] { entityName },
                 null, null, null);
         if (!query.moveToFirst()) {
             return false;
         }
-        loadEntityFromCursor(query, entity, entityClass);
+        loadEntityFromCursor(query, entity);
         return true;
     }
 
-    private List<Condition> loadAllConditions() {
+    public List<Condition> loadAllConditions() {
         return loadAllEntities(Condition.class, TABLE_CONDITIONS, null);
     }
 
@@ -263,14 +276,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
-                loadEntityFromCursor(query, entity, entityClass);
+                loadEntityFromCursor(query, entity);
                 result.add(entity);
             } while(query.moveToNext());
         }
         return result;
     }
 
-    private <T extends BaseEntity> void loadEntityFromCursor(Cursor query, T entity, Class<T> entityClass) {
+    private <T extends BaseEntity> void loadEntityFromCursor(Cursor query, T entity) {
         String[] columnNames = query.getColumnNames();
         for (int i = 0; i < columnNames.length; i++) {
             String columnName = columnNames[i];
@@ -282,7 +295,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } else {
                 String setterName = "set" + Character.toUpperCase(columnName.charAt(0)) + columnName.substring(1);
                 try {
-                    Method setter = entityClass.getDeclaredMethod(setterName, int.class);
+                    Method setter = entity.getClass().getDeclaredMethod(setterName, int.class);
                     setter.invoke(entity, query.getInt(i));
 
                 } catch (NoSuchMethodException ignored) {
@@ -308,5 +321,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("weaponId", weapon.getId());
         values.put("active", 0);
         getWritableDatabase().insert(TABLE_CHARACTER_WEAPONS, null, values);
+    }
+
+    public void addCharacterCondition(PlayerCharacter character, Condition condition, boolean active) {
+        ContentValues values = new ContentValues();
+        values.put("characterId", character.getId());
+        values.put("conditionId", condition.getId());
+        values.put("active", active ? 1 : 0);
+        getWritableDatabase().insert(TABLE_CHARACTER_CONDITIONS, null, values);
+    }
+
+    public void setConditionActive(PlayerCharacter character, Condition condition, boolean active) {
+        ContentValues values = new ContentValues();
+        values.put("active", active ? 1 : 0);
+        getWritableDatabase().update(TABLE_CHARACTER_CONDITIONS, values, "characterId=? and conditionId=?",
+                new String[] { String.valueOf(character.getId()), String.valueOf(condition.getId()) });
     }
 }

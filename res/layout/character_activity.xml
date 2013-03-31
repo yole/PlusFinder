@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent" android:id="@+id/characterActivity">
+              android:layout_height="match_parent">
 
     <Spinner
             android:layout_width="fill_parent"
@@ -28,4 +28,15 @@
             android:layout_height="wrap_content"
             android:text="saves"
             android:id="@+id/saveText"/>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" android:layout_gravity="right|center_vertical"
+            android:id="@+id/characterActivity">
+    </LinearLayout>
+    <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/addCondition"
+            android:id="@+id/addCondition" android:onClick="onAddCondition"/>
 </LinearLayout>

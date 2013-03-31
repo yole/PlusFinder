@@ -2,13 +2,14 @@ package ru.yole.plusfinder;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
 import ru.yole.plusfinder.model.ActiveCondition;
+import ru.yole.plusfinder.model.Condition;
 import ru.yole.plusfinder.model.Weapon;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author yole
@@ -32,22 +33,28 @@ public class CharacterActivity extends AbstractCharacterActivity {
         myACText = (TextView) findViewById(R.id.acText);
         mySavesText = (TextView) findViewById(R.id.saveText);
 
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.characterActivity);
         for (final ActiveCondition activeCondition : myCharacter.getActiveConditions()) {
-            Switch conditionSwitch = new Switch(this);
-            conditionSwitch.setText(activeCondition.getCondition().getName());
-            conditionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    activeCondition.setActive(!activeCondition.isActive());
-                    updateValues();
-                }
-            });
-            linearLayout.addView(conditionSwitch,
-                    new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            addConditionSwitch(activeCondition);
         }
 
         updateValues();
+    }
+
+    private void addConditionSwitch(final ActiveCondition activeCondition) {
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.characterActivity);
+        Switch conditionSwitch = new Switch(this);
+        conditionSwitch.setText(activeCondition.getCondition().getName());
+        conditionSwitch.setChecked(activeCondition.isActive());
+        conditionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                activeCondition.setActive(isChecked);
+                myDatabaseHelper.setConditionActive(myCharacter, activeCondition.getCondition(), isChecked);
+                updateValues();
+            }
+        });
+        linearLayout.addView(conditionSwitch,
+                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
     }
 
     private void updateValues() {
@@ -78,5 +85,23 @@ public class CharacterActivity extends AbstractCharacterActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void onAddCondition(View view) {
+        List<Condition> conditions = myDatabaseHelper.loadAllConditions();
+        for (Iterator<Condition> it = conditions.iterator(); it.hasNext(); ) {
+            Condition condition = it.next();
+            if (myCharacter.isConditionAvailable(condition)) {
+                it.remove();
+            }
+        }
+        new PickerDialog<Condition>(conditions, "Choose Condition", new SelectionListener<Condition>() {
+            @Override
+            public void onSelected(Condition condition) {
+                ActiveCondition activeCondition = myCharacter.addActiveCondition(condition, true);
+                myDatabaseHelper.addCharacterCondition(myCharacter, condition, true);
+                addConditionSwitch(activeCondition);
+            }
+        }).show(getFragmentManager(), "addCondition");
     }
 }

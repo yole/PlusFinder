@@ -50,12 +50,23 @@ public class PlayerCharacter extends BaseEntity {
         myWeapons.add(weapon);
     }
 
-    public void addActiveCondition(Condition condition) {
-        myActiveConditions.add(new ActiveCondition(condition));
+    public ActiveCondition addActiveCondition(Condition condition, boolean active) {
+        ActiveCondition activeCondition = new ActiveCondition(condition, active);
+        myActiveConditions.add(activeCondition);
+        return activeCondition;
     }
 
     public List<ActiveCondition> getActiveConditions() {
         return myActiveConditions;
+    }
+
+    public boolean isConditionAvailable(Condition condition) {
+        for (ActiveCondition activeCondition : myActiveConditions) {
+            if (activeCondition.getCondition().equals(condition)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void addItem(Item item) {
@@ -227,6 +238,4 @@ public class PlayerCharacter extends BaseEntity {
         }
         return Integer.toString(result);
     }
-
-
 }

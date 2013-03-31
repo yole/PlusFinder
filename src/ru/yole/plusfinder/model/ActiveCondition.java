@@ -7,8 +7,9 @@ public class ActiveCondition {
     private final Condition myCondition;
     private boolean myActive;
 
-    public ActiveCondition(Condition condition) {
+    public ActiveCondition(Condition condition, boolean active) {
         myCondition = condition;
+        myActive = active;
     }
 
     public Condition getCondition() {
