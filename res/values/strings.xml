@@ -6,4 +6,6 @@
     <string name="name">Name:</string>
     <string name="save">Save</string>
     <string name="inventory">Inventory</string>
+    <string name="add_item">Add Item</string>
+    <string name="selectItem">Select Item</string>
 </resources>

@@ -24,4 +24,8 @@ public abstract class AbstractCharacterActivity extends Activity {
             finish();
         }
     }
+
+    public PlayerCharacter getCharacter() {
+        return myCharacter;
+    }
 }

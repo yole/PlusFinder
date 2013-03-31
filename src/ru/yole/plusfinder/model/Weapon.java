@@ -3,7 +3,7 @@ package ru.yole.plusfinder.model;
 /**
  * @author yole
  */
-public class Weapon extends Named {
+public class Weapon extends BaseEntity {
     private int myDamageDiceCount = 1;
     private int myDamageDiceSize;
     private int myAttackModifier;

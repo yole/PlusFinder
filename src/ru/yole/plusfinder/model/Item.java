@@ -3,7 +3,7 @@ package ru.yole.plusfinder.model;
 /**
  * @author yole
  */
-public class Item extends Named {
+public class Item extends BaseEntity {
     private int myAcBonus;
     private int myMaxDexBonus = -1;
 

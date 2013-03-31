@@ -199,11 +199,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for (Condition condition : loadAllConditions()) {
             pc.addActiveCondition(condition);
         }
-        Item item = new Item();
-        if (loadEntityByName(item, Item.class, TABLE_ITEMS, "Chain Mail")) {
-            pc.addItem(item);
-        }
+
+        loadCharacterItems(pc);
         return pc;
+    }
+
+    private void loadCharacterItems(PlayerCharacter pc) {
+        String query = "select i.* from Items i inner join CharacterItems ci on i._id=ci.itemId where ci.characterId=?";
+        Cursor c = getReadableDatabase().rawQuery(query, new String[] { Long.toString(pc.getId())} );
+        pc.setInventory(loadEntitiesFromCursor(Item.class, c));
     }
 
     private Weapon loadUnarmedStrike() {
@@ -212,7 +216,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return weapon;
     }
 
-    private <T> boolean loadEntityByName(T entity, Class<T> entityClass, String tableName, String entityName) {
+    private <T extends BaseEntity> boolean loadEntityByName(T entity, Class<T> entityClass, String tableName, String entityName) {
         Cursor query = getReadableDatabase().query(tableName, null, "name=?", new String[] { entityName },
                 null, null, null);
         if (!query.moveToFirst()) {
@@ -223,42 +227,66 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private List<Condition> loadAllConditions() {
-        List<Condition> result = new ArrayList<Condition>();
-        Cursor query = getReadableDatabase().query(TABLE_CONDITIONS, null, null, null, null, null, null);
+        return loadAllEntities(Condition.class, TABLE_CONDITIONS, null);
+    }
+
+    public List<Item> loadAllItems() {
+        return loadAllEntities(Item.class, TABLE_ITEMS, "name");
+    }
+
+    private <T extends BaseEntity> List<T> loadAllEntities(Class<T> entityClass, String tableName, String orderBy) {
+        Cursor query = getReadableDatabase().query(tableName, null, null, null, null, null, orderBy);
+        return loadEntitiesFromCursor(entityClass, query);
+    }
+
+    private <T extends BaseEntity> List<T> loadEntitiesFromCursor(Class<T> entityClass, Cursor query) {
+        List<T> result = new ArrayList<T>();
         if (query.moveToFirst()) {
             do {
-                Condition condition = new Condition();
-                loadEntityFromCursor(query, condition, Condition.class);
-                result.add(condition);
+                T entity;
+                try {
+                    entity = entityClass.newInstance();
+                } catch (InstantiationException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                loadEntityFromCursor(query, entity, entityClass);
+                result.add(entity);
             } while(query.moveToNext());
         }
         return result;
     }
 
-    private <T> void loadEntityFromCursor(Cursor query, T entity, Class<T> entityClass) {
+    private <T extends BaseEntity> void loadEntityFromCursor(Cursor query, T entity, Class<T> entityClass) {
         String[] columnNames = query.getColumnNames();
         for (int i = 0; i < columnNames.length; i++) {
             String columnName = columnNames[i];
             if (columnName.equals("name")) {
-                if (entity instanceof Named) {
-                    ((Named) entity).setName(query.getString(i));
-                }
+                entity.setName(query.getString(i));
             }
-            else {
+            else if (columnName.equals("_id")) {
+                entity.setId(query.getLong(i));
+            } else {
                 String setterName = "set" + Character.toUpperCase(columnName.charAt(0)) + columnName.substring(1);
                 try {
                     Method setter = entityClass.getDeclaredMethod(setterName, int.class);
                     setter.invoke(entity, query.getInt(i));
 
                 } catch (NoSuchMethodException ignored) {
-                }
-                catch (InvocationTargetException e) {
+                } catch (InvocationTargetException e) {
                     throw new RuntimeException(e);
-                }
-                catch (IllegalAccessException e) {
+                } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
+    }
+
+    public void addCharacterItem(PlayerCharacter character, Item item) {
+        ContentValues values = new ContentValues();
+        values.put("characterId", character.getId());
+        values.put("itemId", item.getId());
+        getWritableDatabase().insert(TABLE_CHARACTER_ITEMS, null, values);
     }
 }

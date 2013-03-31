@@ -5,8 +5,7 @@ import java.util.*;
 /**
  * @author yole
  */
-public class PlayerCharacter extends Named {
-    private long myId = -1;
+public class PlayerCharacter extends BaseEntity {
     private final Map<String, Integer> myStats = new HashMap<String, Integer>();
     private final List<Weapon> myWeapons = new ArrayList<Weapon>();
     private Weapon myActiveWeapon;
@@ -19,14 +18,6 @@ public class PlayerCharacter extends Named {
     public static final String STAT_BAB = "BAB";
 
     public static final String[] STAT_NAMES = {STAT_STR, STAT_DEX, "Con", "Int", "Wis", "Cha", STAT_BAB, "Fort", "Ref", "Will" };
-
-    public long getId() {
-        return myId;
-    }
-
-    public void setId(long id) {
-        myId = id;
-    }
 
     public Weapon getActiveWeapon() {
         return myActiveWeapon;
@@ -161,5 +152,10 @@ public class PlayerCharacter extends Named {
 
     public List<Item> getInventory() {
         return myInventory;
+    }
+
+    public void setInventory(List<Item> inventory) {
+        myInventory.clear();
+        myInventory.addAll(inventory);
     }
 }

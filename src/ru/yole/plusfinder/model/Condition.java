@@ -3,7 +3,7 @@ package ru.yole.plusfinder.model;
 /**
  * @author yole
  */
-public class Condition extends Named {
+public class Condition extends BaseEntity {
     private int myAttackBonus;
     private int myDamageBonus;
     private int myBabMultiplier;
