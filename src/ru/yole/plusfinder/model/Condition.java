@@ -6,9 +6,14 @@ package ru.yole.plusfinder.model;
 public class Condition extends BaseEntity {
     private int myAttackBonus;
     private int myDamageBonus;
+    private int myAcBonus;
     private int myBabMultiplier;
     private int myMeleeOnly;
     private int myMissileOnly;
+    private int myLoseACDexBonus;
+    private int myStrBonus;
+    private int myDexBonus;
+    private int mySaveBonus;
 
     public int getAttackBonus() {
         return myAttackBonus;
@@ -24,6 +29,46 @@ public class Condition extends BaseEntity {
 
     public void setDamageBonus(int damageBonus) {
         myDamageBonus = damageBonus;
+    }
+
+    public int getAcBonus() {
+        return myAcBonus;
+    }
+
+    public void setAcBonus(int acBonus) {
+        myAcBonus = acBonus;
+    }
+
+    public boolean isLoseAcDexBonus() {
+        return myLoseACDexBonus != 0;
+    }
+
+    public void setLoseACDexBonus(int loseACDexBonus) {
+        myLoseACDexBonus = loseACDexBonus;
+    }
+
+    public int getStrBonus() {
+        return myStrBonus;
+    }
+
+    public void setStrBonus(int strBonus) {
+        myStrBonus = strBonus;
+    }
+
+    public int getDexBonus() {
+        return myDexBonus;
+    }
+
+    public void setDexBonus(int dexBonus) {
+        myDexBonus = dexBonus;
+    }
+
+    public int getSaveBonus() {
+        return mySaveBonus;
+    }
+
+    public void setSaveBonus(int saveBonus) {
+        mySaveBonus = saveBonus;
     }
 
     public int getBabMultiplier() {

@@ -1,7 +1,42 @@
 [
      {
+         "name": "Cowering",
+         "acBonus": -2,
+         "loseACDexBonus": true
+     },
+     {
          "name": "Dazzled",
          "attackBonus": -1
+     },
+     {
+         "name":" Entangled",
+         "attackBonus": -2,
+         "dexBonus": -4
+     },
+     {
+         "name": "Exhausted",
+         "strBonus": -6,
+         "dexBonus": -6
+     },
+     {
+         "name": "Fatigued",
+         "strBonus": -2,
+         "dexBonus": -2
+     },
+     {
+         "name": "Flat-Footed",
+         "loseACDexBonus": true
+     },
+     {
+         "name": "Shaken",
+         "attackBonus": -2,
+         "saveBonus": -2
+     },
+     {
+         "name": "Sickened",
+         "attackBonus": -2,
+         "damageBonus": -2,
+         "saveBonus": -2
      },
      {
          "name": "Power Attack",

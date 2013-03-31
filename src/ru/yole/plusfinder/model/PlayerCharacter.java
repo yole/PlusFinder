@@ -14,10 +14,20 @@ public class PlayerCharacter extends BaseEntity {
 
     public static final String STAT_STR = "Str";
     public static final String STAT_DEX = "Dex";
+    public static final String STAT_CON = "Con";
+    public static final String STAT_WIS = "Wis";
 
     public static final String STAT_BAB = "BAB";
 
-    public static final String[] STAT_NAMES = {STAT_STR, STAT_DEX, "Con", "Int", "Wis", "Cha", STAT_BAB, "Fort", "Ref", "Will" };
+    public static final String STAT_FORT = "Fort";
+    public static final String STAT_REF = "Ref";
+    public static final String STAT_WILL = "Will";
+
+    public static final String[] STAT_NAMES = {
+            STAT_STR, STAT_DEX, STAT_CON, "Int", STAT_WIS, "Cha",
+            STAT_BAB,
+            STAT_FORT, STAT_REF, STAT_WILL
+    };
 
     public Weapon getActiveWeapon() {
         return myActiveWeapon;
@@ -122,7 +132,20 @@ public class PlayerCharacter extends BaseEntity {
     }
 
     public int getBonus(String statStr) {
-        return (getStat(statStr) - 10) / 2;
+        return (getEffectiveStat(statStr) - 10) / 2;
+    }
+
+    public int getEffectiveStat(String statName) {
+        int stat = getStat(statName);
+        for (Condition condition : getCurrentConditions()) {
+            if (statName.equals(STAT_STR)) {
+                stat += condition.getStrBonus();
+            }
+            else if (statName.equals(STAT_DEX)) {
+                stat += condition.getDexBonus();
+            }
+        }
+        return stat;
     }
 
     public String getDamageText() {
@@ -134,8 +157,11 @@ public class PlayerCharacter extends BaseEntity {
         for (Condition condition : getCurrentConditions()) {
             damageBonus += multiplyByBab(condition, condition.getDamageBonus());
         }
-        if (damageBonus != 0) {
+        if (damageBonus > 0) {
             return baseDamage + "+" + damageBonus;
+        }
+        if (damageBonus < 0) {
+            return baseDamage + Integer.toString(damageBonus);
         }
         return baseDamage;
     }
@@ -150,6 +176,12 @@ public class PlayerCharacter extends BaseEntity {
                 dexBonus = Math.min(dexBonus, maxDexBonus);
             }
         }
+        for (Condition condition : getCurrentConditions()) {
+            currentAC += condition.getAcBonus();
+            if (condition.isLoseAcDexBonus()) {
+                dexBonus = 0;
+            }
+        }
         currentAC += dexBonus;
         return currentAC;
     }
@@ -162,4 +194,30 @@ public class PlayerCharacter extends BaseEntity {
         myInventory.clear();
         myInventory.addAll(inventory);
     }
+
+    public String getFortSaveText() {
+        return getSaveText(STAT_FORT, STAT_CON);
+    }
+
+    public String getRefSaveText() {
+        return getSaveText(STAT_REF, STAT_DEX);
+    }
+
+    public String getWillSaveText() {
+        return getSaveText(STAT_WILL, STAT_WIS);
+    }
+
+    private String getSaveText(String saveStatName, String abilityName) {
+        int result = getStat(saveStatName);
+        result += getBonus(abilityName);
+        for (Condition condition : getCurrentConditions()) {
+            result += condition.getSaveBonus();
+        }
+        if (result >= 0) {
+            return "+" + result;
+        }
+        return Integer.toString(result);
+    }
+
+
 }

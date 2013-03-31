@@ -12,16 +12,20 @@
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="New Text"
-            android:id="@+id/attackText"/>
+            android:id="@+id/attackText" android:text="attack"/>
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="New Text"
+            android:text="damage"
             android:id="@+id/damageText" android:layout_gravity="center"/>
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="New Text"
+            android:text="ac"
             android:id="@+id/acText"/>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="saves"
+            android:id="@+id/saveText"/>
 </LinearLayout>

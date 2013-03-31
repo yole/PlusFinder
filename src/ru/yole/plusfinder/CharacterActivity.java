@@ -18,6 +18,7 @@ public class CharacterActivity extends AbstractCharacterActivity {
     private TextView myAttackText;
     private TextView myDamageText;
     private TextView myACText;
+    private TextView mySavesText;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +30,7 @@ public class CharacterActivity extends AbstractCharacterActivity {
         myAttackText = (TextView) findViewById(R.id.attackText);
         myDamageText = (TextView) findViewById(R.id.damageText);
         myACText = (TextView) findViewById(R.id.acText);
+        mySavesText = (TextView) findViewById(R.id.saveText);
 
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.characterActivity);
         for (final ActiveCondition activeCondition : myCharacter.getActiveConditions()) {
@@ -52,6 +54,9 @@ public class CharacterActivity extends AbstractCharacterActivity {
         myAttackText.setText("Attack: " + myCharacter.getAttackText());
         myDamageText.setText("Damage: " + myCharacter.getDamageText());
         myACText.setText("AC: " + myCharacter.getACText());
+        mySavesText.setText("Fort: " + myCharacter.getFortSaveText() +
+                "; Ref: " + myCharacter.getRefSaveText() +
+                "; Will "+ myCharacter.getWillSaveText());
     }
 
     @Override
