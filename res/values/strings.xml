@@ -8,4 +8,6 @@
     <string name="inventory">Inventory</string>
     <string name="add_item">Add Item</string>
     <string name="selectItem">Select Item</string>
+    <string name="add_weapon">Add Weapon</string>
+    <string name="selectWeapon">Select Weapon</string>
 </resources>

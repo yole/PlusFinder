@@ -193,14 +193,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 pc.setStat(column, query.getInt(i));
             }
         }
-        Weapon unarmedStrike = loadUnarmedStrike();
-        pc.setWeapons(Collections.singleton(unarmedStrike));
-        pc.setActiveWeapon(unarmedStrike);
         for (Condition condition : loadAllConditions()) {
             pc.addActiveCondition(condition);
         }
 
         loadCharacterItems(pc);
+        loadCharacterWeapons(pc);
         return pc;
     }
 
@@ -208,6 +206,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String query = "select i.* from Items i inner join CharacterItems ci on i._id=ci.itemId where ci.characterId=?";
         Cursor c = getReadableDatabase().rawQuery(query, new String[] { Long.toString(pc.getId())} );
         pc.setInventory(loadEntitiesFromCursor(Item.class, c));
+    }
+
+    private void loadCharacterWeapons(PlayerCharacter pc) {
+        String query = "select w.* from Weapons w inner join CharacterWeapons cw on w._id=cw.weaponId where cw.characterId=?";
+        Cursor c = getReadableDatabase().rawQuery(query, new String[] { Long.toString(pc.getId())} );
+        List<Weapon> weapons = loadEntitiesFromCursor(Weapon.class, c);
+        Weapon unarmedStrike = loadUnarmedStrike();
+        weapons.add(unarmedStrike);
+        pc.setWeapons(weapons);
+        pc.setActiveWeapon(unarmedStrike);
     }
 
     private Weapon loadUnarmedStrike() {
@@ -232,6 +240,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<Item> loadAllItems() {
         return loadAllEntities(Item.class, TABLE_ITEMS, "name");
+    }
+
+    public List<Weapon> loadAllWeapons() {
+        return loadAllEntities(Weapon.class, TABLE_WEAPONS, "name");
     }
 
     private <T extends BaseEntity> List<T> loadAllEntities(Class<T> entityClass, String tableName, String orderBy) {
@@ -288,5 +300,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("characterId", character.getId());
         values.put("itemId", item.getId());
         getWritableDatabase().insert(TABLE_CHARACTER_ITEMS, null, values);
+    }
+
+    public void addCharacterWeapon(PlayerCharacter character, Weapon weapon) {
+        ContentValues values = new ContentValues();
+        values.put("characterId", character.getId());
+        values.put("weaponId", weapon.getId());
+        values.put("active", 0);
+        getWritableDatabase().insert(TABLE_CHARACTER_WEAPONS, null, values);
     }
 }

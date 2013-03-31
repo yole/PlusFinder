@@ -36,6 +36,10 @@ public class PlayerCharacter extends BaseEntity {
         myWeapons.addAll(weapons);
     }
 
+    public void addWeapon(Weapon weapon) {
+        myWeapons.add(weapon);
+    }
+
     public void addActiveCondition(Condition condition) {
         myActiveConditions.add(new ActiveCondition(condition));
     }
