@@ -12,23 +12,6 @@ public class PlayerCharacter extends BaseEntity {
     private final List<ActiveCondition> myActiveConditions = new ArrayList<ActiveCondition>();
     private final List<Item> myInventory = new ArrayList<Item>();
 
-    public static final String STAT_STR = "Str";
-    public static final String STAT_DEX = "Dex";
-    public static final String STAT_CON = "Con";
-    public static final String STAT_WIS = "Wis";
-
-    public static final String STAT_BAB = "BAB";
-
-    public static final String STAT_FORT = "Fort";
-    public static final String STAT_REF = "Ref";
-    public static final String STAT_WILL = "Will";
-
-    public static final String[] STAT_NAMES = {
-            STAT_STR, STAT_DEX, STAT_CON, "Int", STAT_WIS, "Cha",
-            STAT_BAB,
-            STAT_FORT, STAT_REF, STAT_WILL
-    };
-
     public Weapon getActiveWeapon() {
         return myActiveWeapon;
     }
@@ -105,7 +88,7 @@ public class PlayerCharacter extends BaseEntity {
 
     private static boolean isAbility(String statName) {
         for (int i = 0; i < 6; i++) {
-            if (statName.equals(STAT_NAMES[i])) {
+            if (statName.equals(StatNames.STAT_NAMES[i])) {
                 return true;
             }
         }
@@ -117,19 +100,23 @@ public class PlayerCharacter extends BaseEntity {
     }
 
     public String getAttackText() {
-        int attackBonus = getStat(STAT_BAB);
+        int attackBonus = getStat(StatNames.STAT_BAB);
         int extraAttacks = 0;
         for (Condition condition : getCurrentConditions()) {
             extraAttacks += condition.getExtraAttacks();
         }
+
+        int attackBonusModifier = myActiveWeapon.isMissile() ? getBonus(StatNames.STAT_DEX) : getBonus(StatNames.STAT_STR);
+        BonusCalculator calculator = new BonusCalculator();
+        for (Condition condition : getCurrentConditions()) {
+            calculator.addBonus(condition.getBonusType(), multiplyByBab(condition, condition.getAttackBonus()));
+        }
+        attackBonusModifier += calculator.getResult();
+
         StringBuilder result = new StringBuilder();
         do {
             if (result.length() > 0) {
                 result.append("/");
-            }
-            int attackBonusModifier = myActiveWeapon.isMissile() ? getBonus(STAT_DEX) : getBonus(STAT_STR);
-            for (Condition condition : getCurrentConditions()) {
-                attackBonusModifier += multiplyByBab(condition, condition.getAttackBonus());
             }
             result.append("+");
             result.append(attackBonus + attackBonusModifier);
@@ -146,7 +133,7 @@ public class PlayerCharacter extends BaseEntity {
     private int multiplyByBab(Condition condition, int bonus) {
         int multiplier = condition.getBabMultiplier();
         if (multiplier > 0) {
-            return (getStat(STAT_BAB) / multiplier + 1) * bonus;
+            return (getStat(StatNames.STAT_BAB) / multiplier + 1) * bonus;
         }
         return bonus;
     }
@@ -157,15 +144,11 @@ public class PlayerCharacter extends BaseEntity {
 
     public int getEffectiveStat(String statName) {
         int stat = getStat(statName);
+        BonusCalculator calculator = new BonusCalculator();
         for (Condition condition : getCurrentConditions()) {
-            if (statName.equals(STAT_STR)) {
-                stat += condition.getStrBonus();
-            }
-            else if (statName.equals(STAT_DEX)) {
-                stat += condition.getDexBonus();
-            }
+            calculator.addBonus(condition.getBonusType(), condition.getBonus(statName));
         }
-        return stat;
+        return stat + calculator.getResult();
     }
 
     public String getDamageText() {
@@ -174,9 +157,11 @@ public class PlayerCharacter extends BaseEntity {
         }
         String baseDamage = myActiveWeapon.getDamageDiceCount() + "d" + myActiveWeapon.getDamageDiceSize();
         int damageBonus = myActiveWeapon.getDamageModifier();
+        BonusCalculator calculator = new BonusCalculator();
         for (Condition condition : getCurrentConditions()) {
-            damageBonus += multiplyByBab(condition, condition.getDamageBonus());
+            calculator.addBonus(condition.getBonusType(), multiplyByBab(condition, condition.getDamageBonus()));
         }
+        damageBonus += calculator.getResult();
         if (damageBonus > 0) {
             return baseDamage + "+" + damageBonus;
         }
@@ -202,7 +187,7 @@ public class PlayerCharacter extends BaseEntity {
 
     public int getACText() {
         int currentAC = 10;
-        int dexBonus = getBonus(STAT_DEX);
+        int dexBonus = getBonus(StatNames.STAT_DEX);
         for (Item item : myInventory) {
             currentAC += item.getAcBonus();
             int maxDexBonus = item.getMaxDexBonus();
@@ -210,12 +195,14 @@ public class PlayerCharacter extends BaseEntity {
                 dexBonus = Math.min(dexBonus, maxDexBonus);
             }
         }
+        BonusCalculator calculator = new BonusCalculator();
         for (Condition condition : getCurrentConditions()) {
-            currentAC += condition.getAcBonus();
+            calculator.addBonus(condition.getBonusType(), condition.getAcBonus());
             if (condition.isLoseAcDexBonus()) {
                 dexBonus = 0;
             }
         }
+        currentAC += calculator.getResult();
         currentAC += dexBonus;
         return currentAC;
     }
@@ -230,22 +217,24 @@ public class PlayerCharacter extends BaseEntity {
     }
 
     public String getFortSaveText() {
-        return getSaveText(STAT_FORT, STAT_CON);
+        return getSaveText(StatNames.STAT_FORT, StatNames.STAT_CON);
     }
 
     public String getRefSaveText() {
-        return getSaveText(STAT_REF, STAT_DEX);
+        return getSaveText(StatNames.STAT_REF, StatNames.STAT_DEX);
     }
 
     public String getWillSaveText() {
-        return getSaveText(STAT_WILL, STAT_WIS);
+        return getSaveText(StatNames.STAT_WILL, StatNames.STAT_WIS);
     }
 
     private String getSaveText(String saveStatName, String abilityName) {
         int result = getStat(saveStatName);
         result += getBonus(abilityName);
+        BonusCalculator calculator = new BonusCalculator();
         for (Condition condition : getCurrentConditions()) {
-            result += condition.getSaveBonus();
+            calculator.addBonus(condition.getBonusType(), condition.getSaveBonus());
+            calculator.addBonus(condition.getBonusType(), condition.getBonus(saveStatName));
         }
         if (result >= 0) {
             return "+" + result;

@@ -1,5 +1,8 @@
 package ru.yole.plusfinder.model;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * @author yole
  */
@@ -43,5 +46,13 @@ public abstract class BaseEntity {
     @Override
     public int hashCode() {
         return (int) (myId ^ (myId >>> 32));
+    }
+
+    public Collection<String> getFieldNames() {
+        return Collections.emptyList();
+    }
+
+    public void setField(String fieldName, int value) {
+        throw new UnsupportedOperationException();
     }
 }

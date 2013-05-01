@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "plusfinder.db";
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     private static final String TABLE_CHARACTERS = "Characters";
     private static final String TABLE_WEAPONS = "Weapons";
@@ -46,7 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         StringBuilder createStatement = new StringBuilder("create table Characters(" +
                 "_id integer primary key autoincrement, name text not null");
-        for (String statName : PlayerCharacter.STAT_NAMES) {
+        for (String statName : StatNames.STAT_NAMES) {
             createStatement.append(",").append(statName).append(" integer");
         }
         createStatement.append(")");
@@ -70,17 +70,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadJsonToTable(db, "items.json", TABLE_ITEMS);
     }
 
-    private void createTableFromBean(SQLiteDatabase db, String tableName, Class entityClass, Object defaultValueSource) {
+    private void createTableFromBean(SQLiteDatabase db, String tableName, Class entityClass, BaseEntity defaultValueSource) {
         StringBuilder builder = new StringBuilder("create table ");
         builder.append(tableName).append("(_id integer primary key autoincrement, name text not null");
+        for (String fieldName : defaultValueSource.getFieldNames()) {
+            builder.append(",").append(fieldName).append(" int default '0'");
+        }
         for (Method method : entityClass.getDeclaredMethods()) {
             String name = method.getName();
-            if (name.startsWith("set")) {
+            if (name.startsWith("set") && method.getParameterTypes().length == 1) {
                 String fieldName = Character.toLowerCase(name.charAt(3)) + name.substring(4);
                 int defaultValue = 0;
                 try {
                     Method getMethod = entityClass.getMethod("g" + name.substring(1));
-                    defaultValue = (Integer) getMethod.invoke(defaultValueSource);
+                    Integer result = (Integer) getMethod.invoke(defaultValueSource);
+                    if (result != null) {
+                        defaultValue = result;
+                    }
                 } catch (NoSuchMethodException ignored) {
                 } catch (InvocationTargetException ignored) {
                 } catch (IllegalAccessException ignored) {
@@ -170,7 +176,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private ContentValues toContentValues(PlayerCharacter character) {
         ContentValues values = new ContentValues();
         values.put("name", character.getName());
-        for (String statName : PlayerCharacter.STAT_NAMES) {
+        for (String statName : StatNames.STAT_NAMES) {
             values.put(statName, character.getStat(statName));
         }
         return values;
@@ -308,7 +314,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             else if (columnName.equals("_id")) {
                 entity.setId(query.getLong(i));
-            } else {
+            }
+            else if (entity.getFieldNames().contains(columnName)) {
+                entity.setField(columnName, query.getInt(i));
+            }
+            else {
                 String setterName = "set" + Character.toUpperCase(columnName.charAt(0)) + columnName.substring(1);
                 try {
                     Method setter = entity.getClass().getDeclaredMethod(setterName, int.class);
@@ -358,9 +368,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("active", 1);
         getWritableDatabase().update(TABLE_CHARACTER_WEAPONS, values, "characterId=? and weaponId=?",
-                new String[] { String.valueOf(character.getId()), String.valueOf(weapon.getId())});
+                new String[]{String.valueOf(character.getId()), String.valueOf(weapon.getId())});
         values.put("active", 0);
         getWritableDatabase().update(TABLE_CHARACTER_WEAPONS, values, "characterId=? and weaponId<>?",
-                new String[] { String.valueOf(character.getId()), String.valueOf(weapon.getId())});
+                new String[]{String.valueOf(character.getId()), String.valueOf(weapon.getId())});
     }
 }

@@ -11,17 +11,17 @@
      {
          "name":" Entangled",
          "attackBonus": -2,
-         "dexBonus": -4
+         "Dex": -4
      },
      {
          "name": "Exhausted",
-         "strBonus": -6,
-         "dexBonus": -6
+         "Str": -6,
+         "Dex": -6
      },
      {
          "name": "Fatigued",
-         "strBonus": -2,
-         "dexBonus": -2
+         "Str": -2,
+         "Dex": -2
      },
      {
          "name": "Flat-Footed",
@@ -69,5 +69,23 @@
          "extraAttacks": 1,
          "attackBonus": -2,
          "missileOnly": true
+     },
+     {
+         "name": "Haste",
+         "extraAttacks": 1,
+         "acBonus": 1,
+         "Ref": 1,
+         "bonusType": "dodge"
+     },
+     {
+         "name": "Bless",
+         "attackBonus": 1,
+         "bonusType": "morale"
+     },
+     {
+         "name": "Heroism",
+         "attackBonus": 2,
+         "saveBonus": 2,
+         "bonusType": "morale"
      }
 ]

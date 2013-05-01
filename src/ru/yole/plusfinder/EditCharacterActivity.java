@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import ru.yole.plusfinder.model.PlayerCharacter;
+import ru.yole.plusfinder.model.StatNames;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class EditCharacterActivity extends Activity {
         GridLayout grid = (GridLayout) findViewById(R.id.characterGrid);
         int row = 1;
 
-        for (String s : PlayerCharacter.STAT_NAMES) {
+        for (String s : StatNames.STAT_NAMES) {
             TextView label = new TextView(this);
             label.setText(s);
             label.setTextSize(TypedValue.COMPLEX_UNIT_PT, 14);

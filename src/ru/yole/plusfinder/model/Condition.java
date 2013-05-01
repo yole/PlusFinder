@@ -1,5 +1,11 @@
 package ru.yole.plusfinder.model;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import static ru.yole.plusfinder.model.StatNames.STAT_NAME_SET;
+
 /**
  * @author yole
  */
@@ -11,10 +17,16 @@ public class Condition extends BaseEntity {
     private int myMeleeOnly;
     private int myMissileOnly;
     private int myLoseACDexBonus;
-    private int myStrBonus;
-    private int myDexBonus;
     private int mySaveBonus;
+    private String myBonusType;
     private int myExtraAttacks;
+
+    private final Map<String, Integer> myBonuses = new HashMap<String, Integer>();
+
+    public int getBonus(String statName) {
+        Integer value = myBonuses.get(statName);
+        return value == null ? 0 : value;
+    }
 
     public int getAttackBonus() {
         return myAttackBonus;
@@ -48,28 +60,20 @@ public class Condition extends BaseEntity {
         myLoseACDexBonus = loseACDexBonus;
     }
 
-    public int getStrBonus() {
-        return myStrBonus;
-    }
-
-    public void setStrBonus(int strBonus) {
-        myStrBonus = strBonus;
-    }
-
-    public int getDexBonus() {
-        return myDexBonus;
-    }
-
-    public void setDexBonus(int dexBonus) {
-        myDexBonus = dexBonus;
-    }
-
     public int getSaveBonus() {
         return mySaveBonus;
     }
 
     public void setSaveBonus(int saveBonus) {
         mySaveBonus = saveBonus;
+    }
+
+    public String getBonusType() {
+        return myBonusType;
+    }
+
+    public void setBonusType(String bonusType) {
+        myBonusType = bonusType;
     }
 
     public int getExtraAttacks() {
@@ -104,4 +108,13 @@ public class Condition extends BaseEntity {
         myMissileOnly = missileOnly;
     }
 
+    @Override
+    public Collection<String> getFieldNames() {
+        return STAT_NAME_SET;
+    }
+
+    @Override
+    public void setField(String fieldName, int value) {
+        myBonuses.put(fieldName, value);
+    }
 }
