@@ -19,10 +19,16 @@ public abstract class AbstractCharacterActivity extends Activity {
         if (characterId == -1) {
             finish();
         }
-        myCharacter = myDatabaseHelper.loadCharacter(characterId);
-        if (myCharacter == null) {
+        myCharacter = new PlayerCharacter();
+        if (!myDatabaseHelper.loadCharacter(characterId, myCharacter)) {
             finish();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        myDatabaseHelper.loadCharacter(myCharacter.getId(), myCharacter);
     }
 
     public PlayerCharacter getCharacter() {

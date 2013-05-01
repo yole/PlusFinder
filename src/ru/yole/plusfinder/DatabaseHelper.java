@@ -182,13 +182,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return values;
     }
 
-    public PlayerCharacter loadCharacter(long characterId) {
+    public boolean loadCharacter(long characterId, PlayerCharacter pc) {
         Cursor query = getReadableDatabase().query(TABLE_CHARACTERS, null, "_id=?", new String[]{Long.toString(characterId)},
                 null, null, null);
         if (!query.moveToFirst()) {
-            return null;
+            return false;
         }
-        PlayerCharacter pc = new PlayerCharacter();
         String[] columnNames = query.getColumnNames();
         for (int i = 0; i < columnNames.length; i++) {
             String column = columnNames[i];
@@ -202,10 +201,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 pc.setStat(column, query.getInt(i));
             }
         }
+        pc.reset();
         loadCharacterConditions(pc);
         loadCharacterItems(pc);
         loadCharacterWeapons(pc);
-        return pc;
+        return true;
     }
 
     private void loadCharacterConditions(PlayerCharacter pc) {

@@ -12,6 +12,13 @@ public class PlayerCharacter extends BaseEntity {
     private final List<ActiveCondition> myActiveConditions = new ArrayList<ActiveCondition>();
     private final List<Item> myInventory = new ArrayList<Item>();
 
+    public void reset() {
+        myWeapons.clear();
+        myActiveWeapon = null;
+        myActiveConditions.clear();
+        myInventory.clear();
+    }
+
     public Weapon getActiveWeapon() {
         return myActiveWeapon;
     }

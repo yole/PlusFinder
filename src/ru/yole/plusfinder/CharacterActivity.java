@@ -18,13 +18,15 @@ public class CharacterActivity extends AbstractCharacterActivity {
     private TextView myAttackText;
     private TextView myACText;
     private TextView mySavesText;
+    private ArrayAdapter<Weapon> myWeaponsAdapter;
+    private Spinner myWeaponSpinner;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.character_activity);
         setTitle(myCharacter.getName());
-        Spinner weaponSpinner = (Spinner) findViewById(R.id.weaponSpinner);
-        weaponSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        myWeaponSpinner = (Spinner) findViewById(R.id.weaponSpinner);
+        myWeaponSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Weapon weapon = myCharacter.getWeapons().get(position);
@@ -37,8 +39,8 @@ public class CharacterActivity extends AbstractCharacterActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-        ArrayAdapter<Weapon> adapter = new ArrayAdapter<Weapon>(this, R.layout.weapon_view, myCharacter.getWeapons());
-        weaponSpinner.setAdapter(adapter);
+        myWeaponsAdapter = new ArrayAdapter<Weapon>(this, R.layout.weapon_view, myCharacter.getWeapons());
+        myWeaponSpinner.setAdapter(myWeaponsAdapter);
         myAttackText = (TextView) findViewById(R.id.attackText);
         myACText = (TextView) findViewById(R.id.acText);
         mySavesText = (TextView) findViewById(R.id.saveText);
@@ -47,6 +49,17 @@ public class CharacterActivity extends AbstractCharacterActivity {
             addConditionSwitch(activeCondition);
         }
 
+        updateValues();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        myWeaponsAdapter.notifyDataSetChanged();
+        int selectedWeaponIndex = myCharacter.getWeapons().indexOf(myCharacter.getActiveWeapon());
+        if (selectedWeaponIndex >= 0) {
+            myWeaponSpinner.setSelection(selectedWeaponIndex);
+        }
         updateValues();
     }
 
@@ -111,6 +124,7 @@ public class CharacterActivity extends AbstractCharacterActivity {
                 ActiveCondition activeCondition = myCharacter.addActiveCondition(condition, true);
                 myDatabaseHelper.addCharacterCondition(myCharacter, condition, true);
                 addConditionSwitch(activeCondition);
+                updateValues();
             }
         }).show(getFragmentManager(), "addCondition");
     }
