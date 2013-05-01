@@ -222,13 +222,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void loadCharacterWeapons(PlayerCharacter pc) {
-        String query = "select w.* from Weapons w inner join CharacterWeapons cw on w._id=cw.weaponId where cw.characterId=?";
+        String query = "select cw.active, w.* from Weapons w inner join CharacterWeapons cw on w._id=cw.weaponId where cw.characterId=?";
         Cursor c = getReadableDatabase().rawQuery(query, new String[] { Long.toString(pc.getId())} );
-        List<Weapon> weapons = loadEntitiesFromCursor(Weapon.class, c);
+        Weapon activeWeapon = null;
+        List<Weapon> weapons = new ArrayList<Weapon>();
+        if (c.moveToFirst()) {
+            do {
+                Weapon weapon = new Weapon();
+                loadEntityFromCursor(c, weapon);
+                weapons.add(weapon);
+                if (c.getInt(0) != 0) {
+                    activeWeapon = weapon;
+                }
+            } while(c.moveToNext());
+        }
         Weapon unarmedStrike = loadUnarmedStrike();
         weapons.add(unarmedStrike);
         pc.setWeapons(weapons);
-        pc.setActiveWeapon(unarmedStrike);
+        if (activeWeapon != null) {
+            pc.setActiveWeapon(activeWeapon);
+        }
+        else {
+            pc.setActiveWeapon(unarmedStrike);
+        }
     }
 
     private Weapon loadUnarmedStrike() {
@@ -336,5 +352,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("active", active ? 1 : 0);
         getWritableDatabase().update(TABLE_CHARACTER_CONDITIONS, values, "characterId=? and conditionId=?",
                 new String[] { String.valueOf(character.getId()), String.valueOf(condition.getId()) });
+    }
+
+    public void setActiveWeapon(PlayerCharacter character, Weapon weapon) {
+        ContentValues values = new ContentValues();
+        values.put("active", 1);
+        getWritableDatabase().update(TABLE_CHARACTER_WEAPONS, values, "characterId=? and weaponId=?",
+                new String[] { String.valueOf(character.getId()), String.valueOf(weapon.getId())});
+        values.put("active", 0);
+        getWritableDatabase().update(TABLE_CHARACTER_WEAPONS, values, "characterId=? and weaponId<>?",
+                new String[] { String.valueOf(character.getId()), String.valueOf(weapon.getId())});
     }
 }

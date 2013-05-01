@@ -15,7 +15,6 @@ import java.util.List;
  * @author yole
  */
 public class CharacterActivity extends AbstractCharacterActivity {
-    private Spinner myWeaponSpinner;
     private TextView myAttackText;
     private TextView myDamageText;
     private TextView myACText;
@@ -25,9 +24,22 @@ public class CharacterActivity extends AbstractCharacterActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.character_activity);
         setTitle(myCharacter.getName());
-        myWeaponSpinner = (Spinner) findViewById(R.id.weaponSpinner);
+        Spinner weaponSpinner = (Spinner) findViewById(R.id.weaponSpinner);
+        weaponSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Weapon weapon = myCharacter.getWeapons().get(position);
+                myCharacter.setActiveWeapon(weapon);
+                myDatabaseHelper.setActiveWeapon(myCharacter, weapon);
+                updateValues();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
         ArrayAdapter<Weapon> adapter = new ArrayAdapter<Weapon>(this, R.layout.weapon_view, myCharacter.getWeapons());
-        myWeaponSpinner.setAdapter(adapter);
+        weaponSpinner.setAdapter(adapter);
         myAttackText = (TextView) findViewById(R.id.attackText);
         myDamageText = (TextView) findViewById(R.id.damageText);
         myACText = (TextView) findViewById(R.id.acText);
