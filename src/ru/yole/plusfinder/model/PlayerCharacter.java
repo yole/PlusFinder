@@ -186,6 +186,20 @@ public class PlayerCharacter extends BaseEntity {
         return baseDamage;
     }
 
+    public String getCritText() {
+        if (myActiveWeapon == null) {
+            return "-";
+        }
+        int critRange = myActiveWeapon.getCritRange();
+        int critModifier = myActiveWeapon.getCritModifier();
+        StringBuilder result = new StringBuilder();
+        if (critRange != 20) {
+            result.append(critRange).append("-20/");
+        }
+        result.append("x").append(critModifier);
+        return result.toString();
+    }
+
     public int getACText() {
         int currentAC = 10;
         int dexBonus = getBonus(STAT_DEX);

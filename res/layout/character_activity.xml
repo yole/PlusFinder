@@ -12,12 +12,7 @@
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/attackText" android:text="attack"/>
-    <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="damage"
-            android:id="@+id/damageText" android:layout_gravity="center"/>
+            android:id="@+id/attackText" android:text="attack" android:textSize="10pt"/>
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

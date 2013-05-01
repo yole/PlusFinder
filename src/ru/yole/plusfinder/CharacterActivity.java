@@ -16,7 +16,6 @@ import java.util.List;
  */
 public class CharacterActivity extends AbstractCharacterActivity {
     private TextView myAttackText;
-    private TextView myDamageText;
     private TextView myACText;
     private TextView mySavesText;
 
@@ -41,7 +40,6 @@ public class CharacterActivity extends AbstractCharacterActivity {
         ArrayAdapter<Weapon> adapter = new ArrayAdapter<Weapon>(this, R.layout.weapon_view, myCharacter.getWeapons());
         weaponSpinner.setAdapter(adapter);
         myAttackText = (TextView) findViewById(R.id.attackText);
-        myDamageText = (TextView) findViewById(R.id.damageText);
         myACText = (TextView) findViewById(R.id.acText);
         mySavesText = (TextView) findViewById(R.id.saveText);
 
@@ -70,8 +68,8 @@ public class CharacterActivity extends AbstractCharacterActivity {
     }
 
     private void updateValues() {
-        myAttackText.setText("Attack: " + myCharacter.getAttackText());
-        myDamageText.setText("Damage: " + myCharacter.getDamageText());
+        myAttackText.setText("Attack: " + myCharacter.getAttackText() + ", Dmg " + myCharacter.getDamageText() +
+           ", Crit "+ myCharacter.getCritText());
         myACText.setText("AC: " + myCharacter.getACText());
         mySavesText.setText("Fort: " + myCharacter.getFortSaveText() +
                 "; Ref: " + myCharacter.getRefSaveText() +
